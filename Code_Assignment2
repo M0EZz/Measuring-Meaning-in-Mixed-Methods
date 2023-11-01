@@ -1,0 +1,44 @@
+---
+title: "Assignment2"
+output: Helge Moes
+date: "2023-01-30"
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## R Markdown
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+8
+Jang & Barnett (1994) examined the impact of national culture on organizational culture by analyzing messages directed to external audiences. For a total of 35 Japanese and American businesses, annual reports for 1992 were analyzed by determining the most frequently used words in all 35 reports. Then, the frequency of each word for each company was determined.
+There are different packages in R that can do MDS. But they use different algorithms. We use the SmacofSym package. It can both do metric (type=interval) and non-metric MDS (type = ordinal) and gives the stress values. Here we choose metric multidimensional scaling.
+To illustrate the use of multidimensional scaling and cluster analysis we first work with a distance matrix that measures the distances between.
+``` {r}
+#Installing packages smacof for multidimensional scaling plot
+#install.packages("smacof")
+library(smacof)
+#read in matrix csv-file
+Jang_Barnett <- read.csv2("Data/Jang_Barnett.csv", header=TRUE,row.names = 1)
+class(Jang_Barnett)
+Jang_Barnett
+#Pre-processing
+Jang_Barnett.C1 <- as.matrix(Jang_Barnett) #Convert to matrix
+Jang_Barnett.C2 <- t(Jang_Barnett.C1)%*%Jang_Barnett.C1 #Transpose matrix
+distance_matrix_JB <- dist(Jang_Barnett.C2, method = "euclidean") #Create a distance matrix
+class(Jang_Barnett.C2)
+9
+#A one-mode matrix of the American and Japanese companies
+Jang_Barnett.C2
+#Calculate dissimilarity matrix
+#dissimilarity <- dist(Jang_Barnett.C2, method = "euclidean")
+#Perform cluster analysis
+fit.cluster <- hclust(dissimilarity, method = "ward.D")
+#Plot results of Cluster Analysis
+plot(fit.cluster, main = "Cluster Analysis Results") + theme( axis.text.x = element_text(angle = 45, hjust = 1))
+#Perform multidimensional scaling
+fit.multi <- cmdscale(dissimilarity, k = 2)
+#Plot results of Multidimensional Scaling
+plot(fit.multi[, 1], fit.multi[, 2], main = "Multidimensional Scaling Results", xlab = "dimension 1", ylab = "dimension 2")
+#Plot a Multidimensional Scaling with an ordinal type through smacof in order to retrieve a cluster between the different companies
+MDS_Companies <- smacofSym(Jang_Barnett.C2, type = "ordinal", ndim=2)
+MDS_Companies$stress
+plot(MDS_Companies)
